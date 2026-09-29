@@ -1,0 +1,426 @@
+{% extends "durc/base.html" %}
+
+{% block title %}{{ soggetto.denominazione }}{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="card">
+            <strong>{{ message }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if durc_valido_con_pdf %}
+<div class="card" style="
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+">
+    <div>
+        <strong>DURC in corso di validità disponibile</strong><br>
+        <small>
+            {{ durc_valido_con_pdf.protocollo|default:"Senza protocollo" }}
+            {% if durc_valido_con_pdf.data_scadenza %}
+                — valido fino al {{ durc_valido_con_pdf.data_scadenza|date:"d/m/Y" }}
+            {% endif %}
+        </small>
+    </div>
+
+    <a
+        class="button"
+        href="{% url 'durc:durc_pdf' durc_valido_con_pdf.pk %}"
+    >
+        Scarica PDF DURC
+    </a>
+</div>
+{% endif %}
+
+<p>
+    <a href="/">← Torna alla ricerca</a>
+</p>
+
+<h1>
+    {{ soggetto.denominazione|default:soggetto.codice_fiscale }}
+</h1>
+
+<div class="card">
+    <strong>Codice fiscale:</strong>
+    {{ soggetto.codice_fiscale }}
+
+    <br>
+
+    <strong>Partita IVA:</strong>
+    {{ soggetto.partita_iva|default:"—" }}
+</div>
+
+<div style="
+    display: flex;
+    gap: .75rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+">
+    <form
+        method="post"
+        action="{% url 'durc:consulta_durc_soggetto' soggetto.pk %}"
+        style="margin: 0;"
+    >
+        {% csrf_token %}
+
+        <button type="submit">
+            Consulta DURC tramite PDND
+        </button>
+    </form>
+
+    {% if ultima_visura %}
+        <a
+            class="button"
+            href="{% url 'durc:registro_imprese_pdf_ultima' soggetto.pk %}"
+        >
+            Scarica PDF Registro Imprese
+        </a>
+    {% endif %}
+</div>
+
+
+{% if ultima_visura %}
+<div class="card">
+
+    <h2>Registro Imprese</h2>
+
+    <p>
+        <strong>Ultima acquisizione:</strong>
+        {{ ultima_visura.acquisito_il|date:"d/m/Y H:i" }}
+    </p>
+
+    {% if ultima_visura.pec %}
+        <p>
+            <strong>PEC risultante dal Registro Imprese:</strong><br>
+            <span style="font-size: 1.15em;">
+                {{ ultima_visura.pec }}
+            </span>
+        </p>
+
+        <p>
+            <small>
+                PEC risultante dall'acquisizione del
+                {{ ultima_visura.acquisito_il|date:"d/m/Y H:i" }}.
+            </small>
+        </p>
+    {% else %}
+        <p>
+            <strong>PEC:</strong>
+            nessun indirizzo PEC presente nell'ultima acquisizione.
+        </p>
+    {% endif %}
+
+    {% if ultima_visura.denominazione %}
+        <p>
+            <strong>Denominazione:</strong>
+            {{ ultima_visura.denominazione }}
+        </p>
+    {% endif %}
+
+    {% if ultima_visura.forma_giuridica %}
+        <p>
+            <strong>Forma giuridica:</strong>
+            {{ ultima_visura.forma_giuridica }}
+        </p>
+    {% endif %}
+
+    {% if ultima_visura.cciaa or ultima_visura.numero_rea %}
+        <p>
+            <strong>REA:</strong>
+            {% if ultima_visura.cciaa %}
+                {{ ultima_visura.cciaa }}
+            {% endif %}
+            {% if ultima_visura.numero_rea %}
+                {{ ultima_visura.numero_rea }}
+            {% endif %}
+        </p>
+    {% endif %}
+
+    {% if ultima_visura.stato_impresa %}
+        <p>
+            <strong>Stato impresa:</strong>
+            {{ ultima_visura.stato_impresa }}
+        </p>
+    {% endif %}
+
+    {% if ultima_visura.sede_via or ultima_visura.sede_comune %}
+        <p>
+            <strong>Sede legale:</strong><br>
+
+            {% if ultima_visura.sede_toponimo %}
+                {{ ultima_visura.sede_toponimo }}
+            {% endif %}
+
+            {% if ultima_visura.sede_via %}
+                {{ ultima_visura.sede_via }}
+            {% endif %}
+
+            {% if ultima_visura.sede_civico %}
+                {{ ultima_visura.sede_civico }}
+            {% endif %}
+
+            <br>
+
+            {% if ultima_visura.sede_cap %}
+                {{ ultima_visura.sede_cap }}
+            {% endif %}
+
+            {% if ultima_visura.sede_comune %}
+                {{ ultima_visura.sede_comune }}
+            {% endif %}
+
+            {% if ultima_visura.sede_provincia %}
+                ({{ ultima_visura.sede_provincia }})
+            {% endif %}
+
+            {% if ultima_visura.sede_frazione %}
+                <br>{{ ultima_visura.sede_frazione }}
+            {% endif %}
+
+            {% if ultima_visura.sede_stato %}
+                <br>{{ ultima_visura.sede_stato }}
+            {% endif %}
+        </p>
+    {% endif %}
+
+</div>
+
+{% else %}
+
+<div class="card">
+    <h2>Registro Imprese</h2>
+
+    <p>
+        Nessun dato Registro Imprese disponibile per questo soggetto.
+    </p>
+
+    <p>
+        Il soggetto può comunque essere consultato per il DURC.
+    </p>
+</div>
+
+{% endif %}
+
+
+<div class="card">
+
+    <h2>Consultazione Registro Imprese</h2>
+
+    <p>
+        La consultazione è un'azione esplicita.
+        Ogni nuova acquisizione viene conservata nello storico
+        e non sovrascrive quelle precedenti.
+    </p>
+
+    <form
+        method="post"
+        action="{% url 'durc:consulta_registro_imprese_soggetto' soggetto.pk %}"
+    >
+        {% csrf_token %}
+
+        <button type="submit">
+            Verifica nel Registro Imprese
+        </button>
+    </form>
+
+</div>
+
+
+<div class="card">
+
+    <h2>Storico Registro Imprese</h2>
+
+    <table data-paginate="true">
+        <thead>
+            <tr>
+                <th>Acquisizione</th>
+                <th>Denominazione</th>
+                <th>REA</th>
+                <th>PEC</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for v in storico_registro_imprese %}
+            <tr>
+                <td>{{ v.acquisito_il|date:"d/m/Y H:i" }}</td>
+
+                <td>
+                    {{ v.denominazione|default:"—" }}
+                </td>
+
+                <td>
+                    {% if v.cciaa or v.numero_rea %}
+                        {% if v.cciaa %}{{ v.cciaa }}{% endif %}
+                        {% if v.numero_rea %} {{ v.numero_rea }}{% endif %}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>
+                    {{ v.pec|default:"—" }}
+                </td>
+
+                <td>
+                    <a
+                        class="button"
+                        href="{% url 'durc:registro_imprese_dettaglio' v.pk %}"
+                    >
+                        Visualizza dati
+                    </a>
+                </td>
+            </tr>
+
+        {% empty %}
+            <tr>
+                <td colspan="5">
+                    Nessuna acquisizione Registro Imprese presente.
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% if ultimo_durc %}
+<div class="card">
+
+    <h2>Ultimo DURC acquisito</h2>
+
+    <p>
+        <span class="badge {{ ultimo_durc.stato }}">
+            {{ ultimo_durc.get_stato_display }}
+        </span>
+    </p>
+
+    <p>
+        <strong>Protocollo:</strong>
+        {{ ultimo_durc.protocollo|default:"—" }}
+    </p>
+
+    <p>
+        <strong>Data documento:</strong>
+        {{ ultimo_durc.data_documento|date:"d/m/Y"|default:"—" }}
+    </p>
+
+    <p>
+        <strong>Scadenza:</strong>
+
+        {% if ultimo_durc.data_scadenza %}
+            <span class="{{ ultimo_durc.stato_scadenza }}">
+                {{ ultimo_durc.data_scadenza|date:"d/m/Y" }}
+
+                {% if ultimo_durc.giorni_alla_scadenza >= 0 %}
+                    — {{ ultimo_durc.giorni_alla_scadenza }} giorni
+                {% else %}
+                    — SCADUTO
+                {% endif %}
+            </span>
+        {% else %}
+            —
+        {% endif %}
+    </p>
+
+    {% if ultimo_durc.pdf %}
+        <p>
+            <a
+                class="button"
+                href="{% url 'durc:durc_pdf' ultimo_durc.pk %}"
+            >
+                Scarica PDF
+            </a>
+        </p>
+    {% endif %}
+</div>
+
+{% else %}
+
+<div class="card">
+    <h2>Nessun DURC archiviato</h2>
+</div>
+
+{% endif %}
+
+<div class="card">
+
+    <h2>Richiesta PDND</h2>
+
+    <p>
+        La richiesta di un nuovo DURC sarà sempre un'azione esplicita.
+        Il DURC già presente in archivio non verrà sovrascritto.
+    </p>
+
+</div>
+
+<div class="card">
+
+    <h2>Storico DURC</h2>
+
+    <table data-paginate="true">
+        <thead>
+            <tr>
+                <th>Acquisizione</th>
+                <th>Protocollo</th>
+                <th>Stato</th>
+                <th>Scadenza</th>
+                <th>PDF</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for d in storico %}
+            <tr>
+                <td>{{ d.acquisito_il|date:"d/m/Y H:i" }}</td>
+                <td>{{ d.protocollo|default:"—" }}</td>
+
+                <td>
+                    <span class="badge {{ d.stato }}">
+                        {{ d.get_stato_display }}
+                    </span>
+                </td>
+
+                <td>
+                    {% if d.data_scadenza %}
+                        <span class="{{ d.stato_scadenza }}">
+                            {{ d.data_scadenza|date:"d/m/Y" }}
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if d.pdf %}
+                        <a
+                            class="button"
+                            href="{% url 'durc:durc_pdf' d.pk %}"
+                        >
+                            Scarica
+                        </a>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5">Nessun DURC presente.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+
+{% endblock %}

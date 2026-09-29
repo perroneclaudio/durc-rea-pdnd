@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="it">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}{{ configurazione_ente.nome_applicazione|default:"Servizi Imprese" }}{% endblock %}</title>
+
+    <style>
+table th:last-child,
+table td:last-child {
+    white-space: nowrap;
+    width: 1%;
+}
+
+table td {
+    overflow-wrap: anywhere;
+}
+
+a.button,
+button {
+    white-space: nowrap;
+}        
+:root {
+            --blu: #004080;
+            --verde: #198754;
+            --giallo: #b58100;
+            --rosso: #b02a37;
+            --grigio: #6c757d;
+            --bordo: #dfe3e7;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6f7;
+            color: #202428;
+        }
+
+        header {
+            background: var(--blu);
+            color: white;
+            padding: 18px 25px;
+        }
+
+        header .content {
+            max-width: 1200px;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header a {
+            color: white;
+            text-decoration: none;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid var(--bordo);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #aaa;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button,
+        .button {
+            border: 0;
+            border-radius: 5px;
+            padding: 12px 18px;
+            background: var(--blu);
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .button-disabled {
+            background: #aaa;
+            cursor: not-allowed;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--bordo);
+            text-align: left;
+        }
+
+        th {
+            background: #f1f3f5;
+        }
+
+        .badge {
+            display: inline-block;
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .REGOLARE {
+            background: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .IRREGOLARE {
+            background: #f8d7da;
+            color: #842029;
+        }
+
+        .NON_EFFETTUABILE,
+        .SCONOSCIUTO {
+            background: #e2e3e5;
+            color: #41464b;
+        }
+
+        .VALIDO {
+            color: var(--verde);
+        }
+
+        .IN_SCADENZA {
+            color: var(--giallo);
+            font-weight: bold;
+        }
+
+        .SCADUTO {
+            color: var(--rosso);
+            font-weight: bold;
+        }
+
+        .statistiche {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .statistica {
+            background: white;
+            border: 1px solid var(--bordo);
+            border-radius: 8px;
+            padding: 15px 20px;
+            min-width: 160px;
+        }
+
+        .statistica strong {
+            display: block;
+            font-size: 26px;
+            color: var(--blu);
+        }
+
+        .ente-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ente-header .app-name {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .ente-header .app-subtitle {
+            font-size: 13px;
+            margin-top: 3px;
+            opacity: 0.9;
+        }
+
+        .ente-header .ente-name {
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        footer {
+            margin-top: 50px;
+            background: #e9ecef;
+            border-top: 1px solid var(--bordo);
+            color: #343a40;
+        }
+
+        footer .content {
+            max-width: 1200px;
+            margin: auto;
+            padding: 25px 20px;
+        }
+
+        footer .footer-dati {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        footer .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--blu);
+        }
+
+        @media (max-width: 700px) {
+            .search {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            header .content {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="content">
+        <div class="ente-header">
+            <div>
+                <a href="/" class="app-name">
+                    {{ configurazione_ente.nome_applicazione|default:"Servizi Imprese" }}
+                </a>
+
+                {% if configurazione_ente.sottotitolo_applicazione %}
+                <div class="app-subtitle">
+                    {{ configurazione_ente.sottotitolo_applicazione }}
+                </div>
+                {% endif %}
+
+                {% if configurazione_ente.nome_ente %}
+                <div class="ente-name">
+                    {{ configurazione_ente.nome_ente }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span>{{ user.username }}</span>
+            <span>|</span>
+            <a href="/admin/">Amministrazione</a>
+            <span>|</span>
+
+            <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button
+                    type="submit"
+                    style="padding: 6px 10px; background: transparent; border: 1px solid rgba(255,255,255,.7);"
+                >
+                    Logout
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</header>
+
+<main>
+    {% block content %}
+    {% endblock %}
+</main>
+
+{% if configurazione_ente %}
+<footer>
+    <div class="content">
+        <strong>{{ configurazione_ente.nome_ente }}</strong>
+
+        {% if configurazione_ente.indirizzo or configurazione_ente.codice_fiscale or configurazione_ente.partita_iva or configurazione_ente.pec or configurazione_ente.email or configurazione_ente.telefono %}
+        <div class="footer-dati">
+            {% if configurazione_ente.indirizzo %}
+                <span>
+                    {{ configurazione_ente.indirizzo }}
+                    {% if configurazione_ente.cap %} - {{ configurazione_ente.cap }}{% endif %}
+                    {% if configurazione_ente.comune %} {{ configurazione_ente.comune }}{% endif %}
+                    {% if configurazione_ente.provincia %} ({{ configurazione_ente.provincia }}){% endif %}
+                </span>
+            {% endif %}
+
+            {% if configurazione_ente.codice_fiscale %}
+                <span>CF: {{ configurazione_ente.codice_fiscale }}</span>
+            {% endif %}
+
+            {% if configurazione_ente.partita_iva %}
+                <span>P.IVA: {{ configurazione_ente.partita_iva }}</span>
+            {% endif %}
+
+            {% if configurazione_ente.pec %}
+                <span>PEC: <a href="mailto:{{ configurazione_ente.pec }}">{{ configurazione_ente.pec }}</a></span>
+            {% endif %}
+
+            {% if configurazione_ente.email %}
+                <span>Email: <a href="mailto:{{ configurazione_ente.email }}">{{ configurazione_ente.email }}</a></span>
+            {% endif %}
+
+            {% if configurazione_ente.telefono %}
+                <span>Tel: {{ configurazione_ente.telefono }}</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if configurazione_ente.testo_footer %}
+        <div style="margin-top: 12px;">
+            {{ configurazione_ente.testo_footer }}
+        </div>
+        {% endif %}
+
+        {% if configurazione_ente.sito_istituzionale or configurazione_ente.url_privacy or configurazione_ente.url_cookie or configurazione_ente.url_accessibilita or configurazione_ente.url_note_legali or configurazione_ente.url_amministrazione_trasparente or configurazione_ente.url_albo_pretorio %}
+        <div class="footer-links">
+            {% if configurazione_ente.sito_istituzionale %}
+                <a href="{{ configurazione_ente.sito_istituzionale }}" target="_blank" rel="noopener">Sito istituzionale</a>
+            {% endif %}
+            {% if configurazione_ente.url_privacy %}
+                <a href="{{ configurazione_ente.url_privacy }}" target="_blank" rel="noopener">Privacy</a>
+            {% endif %}
+            {% if configurazione_ente.url_cookie %}
+                <a href="{{ configurazione_ente.url_cookie }}" target="_blank" rel="noopener">Cookie policy</a>
+            {% endif %}
+            {% if configurazione_ente.url_accessibilita %}
+                <a href="{{ configurazione_ente.url_accessibilita }}" target="_blank" rel="noopener">Accessibilità</a>
+            {% endif %}
+            {% if configurazione_ente.url_note_legali %}
+                <a href="{{ configurazione_ente.url_note_legali }}" target="_blank" rel="noopener">Note legali</a>
+            {% endif %}
+            {% if configurazione_ente.url_amministrazione_trasparente %}
+                <a href="{{ configurazione_ente.url_amministrazione_trasparente }}" target="_blank" rel="noopener">Amministrazione trasparente</a>
+            {% endif %}
+            {% if configurazione_ente.url_albo_pretorio %}
+                <a href="{{ configurazione_ente.url_albo_pretorio }}" target="_blank" rel="noopener">Albo pretorio</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</footer>
+{% endif %}
+
+<div style="
+    text-align: center;
+    font-size: 12px;
+    color: #6c757d;
+    padding: 10px 15px 18px;
+">
+    perroneclaudio@comunesg ·
+    <a
+        href="https://github.com/perroneclaudio/durc-rea-pdnd"
+        target="_blank"
+        rel="noopener"
+        style="color: inherit;"
+    >GitHub</a>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const PAGE_SIZE = 10;
+
+    document.querySelectorAll("table[data-paginate]").forEach(function (table) {
+        const tbody = table.querySelector("tbody");
+        if (!tbody) return;
+
+        const rows = Array.from(tbody.querySelectorAll(":scope > tr"));
+
+        /*
+         * Non paginiamo la singola riga usata dai template
+         * per indicare "nessun risultato".
+         */
+        if (rows.length <= PAGE_SIZE) {
+            return;
+        }
+
+        let currentPage = 1;
+        const totalPages = Math.ceil(rows.length / PAGE_SIZE);
+
+        const navigation = document.createElement("div");
+        navigation.className = "table-pagination";
+        navigation.style.marginTop = "1rem";
+        navigation.style.display = "flex";
+        navigation.style.alignItems = "center";
+        navigation.style.gap = ".5rem";
+        navigation.style.flexWrap = "wrap";
+
+        table.insertAdjacentElement("afterend", navigation);
+
+        function render() {
+            const start = (currentPage - 1) * PAGE_SIZE;
+            const end = start + PAGE_SIZE;
+
+            rows.forEach(function (row, index) {
+                row.style.display =
+                    index >= start && index < end ? "" : "none";
+            });
+
+            navigation.innerHTML = "";
+
+            const previous = document.createElement("button");
+            previous.type = "button";
+            previous.textContent = "← Precedente";
+            previous.disabled = currentPage === 1;
+            previous.addEventListener("click", function () {
+                if (currentPage > 1) {
+                    currentPage--;
+                    render();
+                    table.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            });
+
+            navigation.appendChild(previous);
+
+            for (let page = 1; page <= totalPages; page++) {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.textContent = page;
+
+                if (page === currentPage) {
+                    button.disabled = true;
+                    button.setAttribute("aria-current", "page");
+                }
+
+                button.addEventListener("click", function () {
+                    currentPage = page;
+                    render();
+                    table.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                });
+
+                navigation.appendChild(button);
+            }
+
+            const next = document.createElement("button");
+            next.type = "button";
+            next.textContent = "Successiva →";
+            next.disabled = currentPage === totalPages;
+            next.addEventListener("click", function () {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    render();
+                    table.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+                }
+            });
+
+            navigation.appendChild(next);
+
+            const info = document.createElement("span");
+            info.textContent =
+                "Pagina " + currentPage + " di " + totalPages +
+                " — " + rows.length + " risultati";
+            info.style.marginLeft = ".5rem";
+
+            navigation.appendChild(info);
+        }
+
+        render();
+    });
+});
+</script>
+
+</body>
+</html>

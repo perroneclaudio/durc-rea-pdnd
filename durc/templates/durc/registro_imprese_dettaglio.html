@@ -1,0 +1,72 @@
+{% extends "durc/base.html" %}
+
+{% block title %}
+Registro Imprese - {{ visura.denominazione }}
+{% endblock %}
+
+{% block content %}
+
+<p>
+    <a href="{% url 'durc:soggetto_detail' soggetto.pk %}">
+        ← Torna alla scheda azienda
+    </a>
+</p>
+
+<h1>Registro Imprese</h1>
+
+<div class="card">
+
+    <h2>
+        {{ visura.denominazione|default:soggetto.denominazione }}
+    </h2>
+
+    <p>
+        <strong>Codice fiscale:</strong>
+        {{ visura.codice_fiscale|default:"—" }}
+    </p>
+
+    {% if visura.partita_iva %}
+    <p>
+        <strong>Partita IVA:</strong>
+        {{ visura.partita_iva }}
+    </p>
+    {% endif %}
+
+    {% if visura.cciaa or visura.numero_rea %}
+    <p>
+        <strong>REA:</strong>
+        {{ visura.cciaa }} {{ visura.numero_rea }}
+    </p>
+    {% endif %}
+
+    {% if visura.pec %}
+    <p>
+        <strong>PEC:</strong>
+        {{ visura.pec }}
+    </p>
+    {% endif %}
+
+    <p>
+        <strong>Acquisizione:</strong>
+        {{ visura.acquisito_il|date:"d/m/Y H:i" }}
+    </p>
+
+
+</div>
+
+
+{% for sezione in documento.sezioni %}
+
+<div class="card">
+
+    <h2>{{ sezione.titolo }}</h2>
+
+    {% for nodo in sezione.blocchi %}
+        {% include "durc/_registro_imprese_nodo.html" with nodo=nodo %}
+    {% endfor %}
+
+</div>
+
+{% endfor %}
+
+{% endblock %}

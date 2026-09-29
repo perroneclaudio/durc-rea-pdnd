@@ -1,0 +1,128 @@
+{% extends "durc/base.html" %}
+
+{% block title %}Risultati Registro Imprese{% endblock %}
+
+{% block content %}
+
+<p>
+    <a href="/?q={{ denominazione|urlencode }}">← Torna alla ricerca</a>
+</p>
+
+<h1>Risultati Registro Imprese</h1>
+
+<div class="card">
+    <p>
+        Ricerca per:
+        <strong>{{ denominazione }}</strong>
+        {% if sigla_provincia %}
+            — provincia {{ sigla_provincia }}
+        {% endif %}
+    </p>
+
+    <p>
+        Risultati trovati: <strong>{{ numero_risultati }}</strong>
+    </p>
+
+    {% if limite_raggiunto %}
+        <p>
+            <strong>Attenzione:</strong>
+            sono stati restituiti 200 risultati, che è il limite
+            massimo del servizio. Restringere la ricerca se necessario.
+        </p>
+    {% endif %}
+</div>
+
+<div class="card">
+
+{% if imprese %}
+
+<table data-paginate="true">
+    <thead>
+        <tr>
+            <th>Denominazione</th>
+            <th>CF</th>
+            <th>REA</th>
+            <th>Stato</th>
+            <th>Sede</th>
+            <th>PEC</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+    {% for i in imprese %}
+        <tr>
+            <td>
+                <strong>{{ i.denominazione|default:"—" }}</strong>
+                {% if i.forma_giuridica %}
+                    <br>
+                    <small>{{ i.forma_giuridica }}</small>
+                {% endif %}
+            </td>
+
+            <td>{{ i.codice_fiscale|default:"—" }}</td>
+
+            <td>
+                {% if i.cciaa or i.numero_rea %}
+                    {{ i.cciaa }} {{ i.numero_rea }}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            <td>
+                {{ i.stato_impresa|default:"—" }}
+            </td>
+
+            <td>
+                {% if i.sede_via or i.sede_comune %}
+                    {% if i.sede_toponimo %}{{ i.sede_toponimo }} {% endif %}
+                    {{ i.sede_via }}
+                    {% if i.sede_civico %} {{ i.sede_civico }}{% endif %}
+                    <br>
+                    {% if i.sede_cap %}{{ i.sede_cap }} {% endif %}
+                    {{ i.sede_comune }}
+                    {% if i.sede_provincia %}
+                        ({{ i.sede_provincia }})
+                    {% endif %}
+                {% else %}
+                    —
+                {% endif %}
+            </td>
+
+            <td>{{ i.pec|default:"—" }}</td>
+
+            <td>
+                {% if i.codice_fiscale %}
+                    <form
+                        method="post"
+                        action="{% url 'durc:consulta_registro_imprese_codice_fiscale' %}"
+                    >
+                        {% csrf_token %}
+
+                        <input
+                            type="hidden"
+                            name="codice_fiscale"
+                            value="{{ i.codice_fiscale }}"
+                        >
+
+                        <button type="submit">
+                            Acquisisci
+                        </button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+{% else %}
+
+<p>Nessuna impresa trovata.</p>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

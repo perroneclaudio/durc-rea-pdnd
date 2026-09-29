@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+secrets/
+media/
+staticfiles/
+__pycache__/
+*.pyc
+*.pyo
+*.sqlite3
+db.sqlite3
+docs/STATO_PROGETTO.md

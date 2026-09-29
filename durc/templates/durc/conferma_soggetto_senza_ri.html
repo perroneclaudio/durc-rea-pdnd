@@ -1,0 +1,69 @@
+{% extends "durc/base.html" %}
+
+{% block title %}Crea soggetto{% endblock %}
+
+{% block content %}
+
+<p>
+    <a href="/?q={{ valore_inserito|urlencode }}">
+        ← Torna alla ricerca
+    </a>
+</p>
+
+<h1>Soggetto non presente nel Registro Imprese</h1>
+
+<div class="card">
+
+    <p>
+        Non è stata trovata una posizione corrispondente nel
+        Registro Imprese.
+    </p>
+
+    <p>
+        Questo non impedisce di utilizzare gli altri servizi,
+        compresa la consultazione DURC.
+    </p>
+
+    <form
+        method="post"
+        action="{% url 'durc:crea_soggetto_minimo' %}"
+    >
+        {% csrf_token %}
+
+        <p>
+            <label for="codice_fiscale">
+                <strong>Codice fiscale</strong>
+            </label><br>
+
+            <input
+                id="codice_fiscale"
+                name="codice_fiscale"
+                type="text"
+                value="{{ valore_inserito }}"
+                maxlength="16"
+                required
+                autofocus
+            >
+        </p>
+
+        <p>
+            <label for="partita_iva">
+                Partita IVA
+            </label><br>
+
+            <input
+                id="partita_iva"
+                name="partita_iva"
+                type="text"
+                maxlength="11"
+            >
+        </p>
+
+        <button type="submit">
+            Continua
+        </button>
+    </form>
+
+</div>
+
+{% endblock %}

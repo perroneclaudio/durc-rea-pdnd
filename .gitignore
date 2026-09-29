@@ -1,0 +1,12 @@
+.env
+secrets/
+__pycache__/
+*.pyc
+staticfiles/
+media/
+*.swp
+*.swo
+.DS_Store
+db.sqlite3
+docs/STATO_PROGETTO.md
+utentipdnd.csv

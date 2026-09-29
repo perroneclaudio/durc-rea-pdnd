@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: durc-pdnd-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - durc-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U durc -d durc"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: durc-pdnd-web
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "127.0.0.1:10006:8000"
+    volumes:
+      - durc-media-data:/app/media
+      - durc-pdf-data:/app/data/durc
+      - ./secrets:/run/secrets:ro
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  durc-postgres-data:
+  durc-media-data:
+  durc-pdf-data:

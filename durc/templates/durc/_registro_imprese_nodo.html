@@ -1,0 +1,31 @@
+<div style="
+    margin: .65rem 0 .65rem 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid #ddd;
+">
+    <div>
+        <strong>{{ nodo.label }}</strong>
+
+        {% if nodo.testo %}
+            <span>: {{ nodo.testo }}</span>
+        {% endif %}
+    </div>
+
+    {% if nodo.attributi %}
+        <dl style="
+            display: grid;
+            grid-template-columns: minmax(180px, 260px) 1fr;
+            gap: .25rem 1rem;
+            margin: .5rem 0;
+        ">
+        {% for attributo in nodo.attributi %}
+            <dt>{{ attributo.label }}</dt>
+            <dd style="margin: 0;">{{ attributo.valore }}</dd>
+        {% endfor %}
+        </dl>
+    {% endif %}
+
+    {% for figlio in nodo.figli %}
+        {% include "durc/_registro_imprese_nodo.html" with nodo=figlio %}
+    {% endfor %}
+</div>

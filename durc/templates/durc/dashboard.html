@@ -1,0 +1,171 @@
+{% extends "durc/base.html" %}
+
+{% block title %}Ricerca DURC{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="card">
+            <strong>{{ message }}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<h1>Archivio DURC-REA</h1>
+
+<div class="statistiche">
+    <div class="statistica">
+        <strong>{{ numero_soggetti }}</strong>
+        soggetti
+    </div>
+
+    <div class="statistica">
+        <strong>{{ numero_durc }}</strong>
+        DURC archiviati
+    </div>
+</div>
+
+<br>
+
+<div class="card">
+    <form method="get" class="search">
+        <input
+            type="search"
+            name="q"
+            value="{{ query }}"
+            placeholder="Codice fiscale, Partita IVA o denominazione"
+            autofocus
+        >
+
+        <button type="submit">
+            Cerca
+        </button>
+    </form>
+</div>
+
+{% if query and query|length != 11 and query|length != 16 %}
+<div style="margin: 0 0 1rem 0;">
+    <form
+        method="post"
+        action="{% url 'durc:ricerca_registro_imprese_denominazione' %}"
+    >
+        {% csrf_token %}
+
+        <input
+            type="hidden"
+            name="denominazione"
+            value="{{ query }}"
+        >
+
+        <button type="submit">
+            Cerca online nel Registro Imprese
+        </button>
+    </form>
+</div>
+{% endif %}
+
+{% if query %}
+<div class="card">
+
+    <h2>Risultati</h2>
+
+    {% if risultati %}
+
+    <table data-paginate="true">
+        <thead>
+            <tr>
+                <th>Soggetto</th>
+                <th>Codice fiscale</th>
+                <th>Ultimo DURC</th>
+                <th>Scadenza</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+        {% for r in risultati %}
+            <tr>
+                <td>
+                    <strong>{{ r.soggetto.denominazione|default:"—" }}</strong>
+                </td>
+
+                <td>
+                    {{ r.soggetto.codice_fiscale }}
+                </td>
+
+                <td>
+                    {% if r.ultimo_durc %}
+                        <span class="badge {{ r.ultimo_durc.stato }}">
+                            {{ r.ultimo_durc.get_stato_display }}
+                        </span>
+                    {% else %}
+                        Nessun DURC
+                    {% endif %}
+                </td>
+
+                <td>
+                    {% if r.ultimo_durc.data_scadenza %}
+                        <span class="{{ r.ultimo_durc.stato_scadenza }}">
+                            {{ r.ultimo_durc.data_scadenza|date:"d/m/Y" }}
+                        </span>
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+
+                <td>
+                    <a
+                        class="button"
+                        href="{% url 'durc:soggetto_detail' r.soggetto.pk %}"
+                    >
+                        Apri
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+{% else %}
+
+<p>Nessun soggetto trovato nell'archivio locale.</p>
+
+{% if query %}
+
+    {% if query|length == 11 or query|length == 16 %}
+
+        <p>
+            Ricerca del soggetto nel Registro Imprese in corso...
+        </p>
+
+        <form
+            id="ricerca-registro-imprese"
+            method="post"
+            action="{% url 'durc:consulta_registro_imprese_codice_fiscale' %}"
+        >
+            {% csrf_token %}
+
+            <input
+                type="hidden"
+                name="codice_fiscale"
+                value="{{ query }}"
+            >
+        </form>
+
+        <script>
+            document.getElementById(
+                "ricerca-registro-imprese"
+            ).submit();
+        </script>
+
+    {% endif %}
+
+{% endif %}
+
+{% endif %}   
+
+</div>
+{% endif %}
+
+{% endblock %}
